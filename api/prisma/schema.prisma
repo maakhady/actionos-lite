@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model CompteRendu {
+  id          String   @id @default(uuid())
+  titre       String
+  dateReunion DateTime
+  texteSource String
+  actions     Action[]
+  createdAt   DateTime @default(now())
+}
+
+model Action {
+  id            String      @id @default(uuid())
+  compteRendu   CompteRendu @relation(fields: [compteRenduId], references: [id], onDelete: Cascade)
+  compteRenduId String
+  description   String
+  responsable   String?
+  echeance      DateTime?
+  priorite      Priorite    @default(MOYENNE)
+  statut        Statut      @default(A_FAIRE)
+  origine       Origine     @default(REGLE)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([compteRenduId])
+  @@index([statut])
+}
+
+enum Priorite {
+  BASSE
+  MOYENNE
+  HAUTE
+}
+
+enum Statut {
+  A_FAIRE
+  EN_COURS
+  TERMINE
+}
+
+enum Origine {
+  REGLE
+  IA
+  MANUEL
+}

@@ -1,0 +1,14 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: actionos
+      POSTGRES_PASSWORD: actionos
+      POSTGRES_DB: actionos
+    ports: ["5433:5432"]
+    volumes: [dbdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U actionos"]
+      interval: 5s
+volumes:
+  dbdata:
