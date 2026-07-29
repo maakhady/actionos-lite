@@ -4,14 +4,18 @@ describe('RulesExtractor', () => {
   const extractor = new RulesExtractor();
 
   it('ignore les lignes de titre', async () => {
-    const actions = await extractor.extract('Points abordés :\n- Publier la version 1.2');
+    const actions = await extractor.extract(
+      'Points abordés :\n- Publier la version 1.2',
+    );
 
     expect(actions).toHaveLength(1);
     expect(actions[0].description).toBe('Publier la version 1.2');
   });
 
   it('extrait un responsable explicite', async () => {
-    const actions = await extractor.extract('- Envoyer le message aux testeurs (Responsable : Fatou)');
+    const actions = await extractor.extract(
+      '- Envoyer le message aux testeurs (Responsable : Fatou)',
+    );
 
     expect(actions[0].responsable).toBe('Fatou');
     expect(actions[0].description).not.toContain('Responsable');
@@ -31,19 +35,25 @@ describe('RulesExtractor', () => {
   });
 
   it('extrait une échéance au format numérique', async () => {
-    const actions = await extractor.extract('- Publier la mise à jour avant le 05/08/2026');
+    const actions = await extractor.extract(
+      '- Publier la mise à jour avant le 05/08/2026',
+    );
 
     expect(actions[0].echeance?.toISOString()).toContain('2026-08-05');
   });
 
   it('extrait une échéance au format textuel', async () => {
-    const actions = await extractor.extract('- Préparer le message pour le 3 août 2026');
+    const actions = await extractor.extract(
+      '- Préparer le message pour le 3 août 2026',
+    );
 
     expect(actions[0].echeance?.toISOString()).toContain('2026-08-03');
   });
 
   it('détecte la priorité haute', async () => {
-    const actions = await extractor.extract('- Corriger le bug bloquant du classement');
+    const actions = await extractor.extract(
+      '- Corriger le bug bloquant du classement',
+    );
 
     expect(actions[0].priorite).toBe('HAUTE');
   });
@@ -55,7 +65,9 @@ describe('RulesExtractor', () => {
   });
 
   it("n'invente rien sur un texte sans action", async () => {
-    const actions = await extractor.extract('Réunion du 27 juillet. Tour de table.');
+    const actions = await extractor.extract(
+      'Réunion du 27 juillet. Tour de table.',
+    );
 
     expect(actions).toHaveLength(0);
   });

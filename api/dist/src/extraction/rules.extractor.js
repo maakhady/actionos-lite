@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RulesExtractor = void 0;
+const action_brouillon_1 = require("./domain/action-brouillon");
 const PUCE = /^\s*(?:[-*•–—]|\d+[.)])\s+/;
 const VERBES_ACTION = [
     'publier',
@@ -108,10 +109,10 @@ class RulesExtractor {
     }
     extrairePriorite(ligne) {
         if (MARQUEURS_HAUTE.test(ligne))
-            return 'HAUTE';
+            return action_brouillon_1.Priorite.HAUTE;
         if (MARQUEURS_BASSE.test(ligne))
-            return 'BASSE';
-        return 'MOYENNE';
+            return action_brouillon_1.Priorite.BASSE;
+        return action_brouillon_1.Priorite.MOYENNE;
     }
     extraireDescription(ligne) {
         return ligne

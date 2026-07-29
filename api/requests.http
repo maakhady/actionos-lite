@@ -1,0 +1,218 @@
+### ActionOS Lite — requêtes de test
+### Extension VS Code recommandée : REST Client (humao.rest-client)
+### Cliquer sur « Send Request » au-dessus de chaque bloc.
+
+@base = http://localhost:3000
+@compteRenduId = aad81b27-8896-47cf-ad60-f42cd8afa392
+@actionId = REMPLACER_APRES_VALIDATION
+
+
+# ─────────────────────────────────────────────
+# COMPTES RENDUS
+# ─────────────────────────────────────────────
+
+### Lister tous les comptes rendus (avec le nombre d'actions)
+GET {{base}}/comptes-rendus
+
+### Récupérer un compte rendu et ses actions
+GET {{base}}/comptes-rendus/{{compteRenduId}}
+
+### Créer un compte rendu
+POST {{base}}/comptes-rendus
+Content-Type: application/json
+
+{
+  "titre": "Réunion hebdomadaire produit",
+  "dateReunion": "2026-07-29",
+  "texteSource": "Points abordés :\n- Publier la version 2.0 avant le 15/08/2026\n- Relancer les partenaires (Responsable : Aïcha)\n- Vérifier les statistiques d'usage"
+}
+
+### Modifier un compte rendu
+PATCH {{base}}/comptes-rendus/{{compteRenduId}}
+Content-Type: application/json
+
+{
+  "titre": "Réunion Projet Quizz+ (révisée)"
+}
+
+### Supprimer un compte rendu (supprime ses actions en cascade)
+DELETE {{base}}/comptes-rendus/{{compteRenduId}}
+
+
+# ─────────────────────────────────────────────
+# EXTRACTION
+# ─────────────────────────────────────────────
+
+### Analyser un texte — rien n'est enregistré, c'est un brouillon
+POST {{base}}/comptes-rendus/analyser
+Content-Type: application/json
+
+{
+  "texteSource": "Réunion Projet Quizz+ — 27 juillet 2026\n\nPoints abordés :\n- Publier la nouvelle version sur le Play Store avant le 05/08/2026\n- Corriger le bug bloquant du classement des joueurs\n- Envoyer un message aux testeurs (Responsable : Fatou)\n- Vérifier la fiche Play Store"
+}
+
+### Analyse — démonstration du « ne rien inventer »
+### Aucune action n'a de responsable ni d'échéance : les deux champs restent null
+POST {{base}}/comptes-rendus/analyser
+Content-Type: application/json
+
+{
+  "texteSource": "- Vérifier la fiche Play Store\n- Tester la nouvelle version"
+}
+
+### Analyse — les priorités détectées par marqueurs
+POST {{base}}/comptes-rendus/analyser
+Content-Type: application/json
+
+{
+  "texteSource": "- Corriger le bug bloquant du paiement\n- Ajouter une animation si possible\n- Préparer la présentation"
+}
+
+### Analyse — un texte sans aucune action ne produit rien
+POST {{base}}/comptes-rendus/analyser
+Content-Type: application/json
+
+{
+  "texteSource": "Réunion du 27 juillet. Tour de table et point d'ambiance."
+}
+
+
+# ─────────────────────────────────────────────
+# ACTIONS
+# ─────────────────────────────────────────────
+
+### Valider un lot d'actions (transaction : tout ou rien)
+POST {{base}}/actions/valider
+Content-Type: application/json
+
+{
+  "compteRenduId": "{{compteRenduId}}",
+  "actions": [
+    {
+      "description": "Publier la nouvelle version sur le Play Store",
+      "responsable": "Moussa",
+      "echeance": "2026-08-05",
+      "priorite": "HAUTE"
+    },
+    {
+      "description": "Corriger le bug du classement des joueurs",
+      "responsable": null,
+      "echeance": null,
+      "priorite": "HAUTE"
+    },
+    {
+      "description": "Envoyer un message aux testeurs",
+      "responsable": "Fatou",
+      "echeance": "2026-08-01",
+      "priorite": "MOYENNE"
+    }
+  ]
+}
+
+### Lister toutes les actions (triées par échéance croissante)
+GET {{base}}/actions
+
+### Filtrer par statut — à faire
+GET {{base}}/actions?statut=A_FAIRE
+
+### Filtrer par statut — en cours
+GET {{base}}/actions?statut=EN_COURS
+
+### Filtrer par statut — terminé
+GET {{base}}/actions?statut=TERMINE
+
+### Récupérer une action
+GET {{base}}/actions/{{actionId}}
+
+### Créer une action à la main (action oubliée par l'extraction)
+POST {{base}}/actions
+Content-Type: application/json
+
+{
+  "compteRenduId": "{{compteRenduId}}",
+  "description": "Action ajoutée manuellement à la validation",
+  "responsable": null,
+  "echeance": null,
+  "priorite": "MOYENNE"
+}
+
+### Changer le statut d'une action
+PATCH {{base}}/actions/{{actionId}}
+Content-Type: application/json
+
+{
+  "statut": "EN_COURS"
+}
+
+### Compléter les champs manquants
+PATCH {{base}}/actions/{{actionId}}
+Content-Type: application/json
+
+{
+  "responsable": "Awa",
+  "echeance": "2026-08-10"
+}
+
+### Supprimer une action
+DELETE {{base}}/actions/{{actionId}}
+
+
+# ─────────────────────────────────────────────
+# VALIDATION ET ERREURS
+# ─────────────────────────────────────────────
+
+### 400 — titre vide
+POST {{base}}/comptes-rendus
+Content-Type: application/json
+
+{
+  "titre": "",
+  "dateReunion": "2026-07-29",
+  "texteSource": "Un texte"
+}
+
+### 400 — date invalide
+POST {{base}}/comptes-rendus
+Content-Type: application/json
+
+{
+  "titre": "Réunion",
+  "dateReunion": "bientôt",
+  "texteSource": "Un texte"
+}
+
+### 400 — champ non autorisé (whitelist active)
+POST {{base}}/comptes-rendus
+Content-Type: application/json
+
+{
+  "titre": "Réunion",
+  "dateReunion": "2026-07-29",
+  "texteSource": "Un texte",
+  "champInconnu": "devrait être rejeté"
+}
+
+### 400 — identifiant mal formé (ParseUUIDPipe)
+GET {{base}}/comptes-rendus/pas-un-uuid
+
+### 404 — compte rendu inexistant
+GET {{base}}/comptes-rendus/00000000-0000-4000-8000-000000000000
+
+### 400 — priorité hors de l'énumération
+POST {{base}}/actions
+Content-Type: application/json
+
+{
+  "compteRenduId": "{{compteRenduId}}",
+  "description": "Test",
+  "priorite": "EXTREME"
+}
+
+### 400 — lot de validation vide
+POST {{base}}/actions/valider
+Content-Type: application/json
+
+{
+  "compteRenduId": "{{compteRenduId}}",
+  "actions": []
+}

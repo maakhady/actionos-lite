@@ -127,9 +127,9 @@ export class RulesExtractor implements ActionExtractor {
   }
 
   private extrairePriorite(ligne: string): Priorite {
-    if (MARQUEURS_HAUTE.test(ligne)) return 'HAUTE';
-    if (MARQUEURS_BASSE.test(ligne)) return 'BASSE';
-    return 'MOYENNE';
+    if (MARQUEURS_HAUTE.test(ligne)) return Priorite.HAUTE;
+    if (MARQUEURS_BASSE.test(ligne)) return Priorite.BASSE;
+    return Priorite.MOYENNE;
   }
 
   private extraireDescription(ligne: string): string {
