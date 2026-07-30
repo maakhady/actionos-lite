@@ -11,6 +11,7 @@ export const comptesRendus = {
       texteSource,
       dateReunion,
     }),
+  supprimer: (id: string) => api.delete<void>(`/comptes-rendus/${id}`),
 };
 
 export const actions = {

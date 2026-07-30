@@ -7,6 +7,7 @@ export default function Reunions() {
   const [liste, setListe] = useState<CompteRendu[]>([]);
   const [erreur, setErreur] = useState<string | null>(null);
   const [chargement, setChargement] = useState(true);
+  const [aConfirmer, setAConfirmer] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -19,6 +20,17 @@ export default function Reunions() {
       }
     })();
   }, []);
+
+  const supprimer = async (id: string) => {
+    try {
+      await comptesRendus.supprimer(id);
+      setListe((l) => l.filter((cr) => cr.id !== id));
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : 'Suppression impossible');
+    } finally {
+      setAConfirmer(null);
+    }
+  };
 
   return (
     <div>
@@ -50,17 +62,16 @@ export default function Reunions() {
         {liste.map((cr) => {
           const nombre = cr._count?.actions ?? 0;
           return (
-            <Link
+            <div
               key={cr.id}
-              to={`/validation/${cr.id}`}
               className="flex items-center gap-3 border-b border-bordure px-4 py-3 last:border-b-0 hover:bg-ardoise-50"
             >
-              <div className="min-w-0 flex-1">
+              <Link to={`/validation/${cr.id}`} className="min-w-0 flex-1">
                 <p className="truncate text-sm text-encre">{cr.titre}</p>
                 <p className="mt-0.5 text-xs text-slate-500">
                   {new Date(cr.dateReunion).toLocaleDateString('fr-FR')}
                 </p>
-              </div>
+              </Link>
               <span
                 className={`shrink-0 text-xs ${
                   nombre === 0 ? 'text-or-600' : 'text-slate-500'
@@ -70,7 +81,32 @@ export default function Reunions() {
                   ? 'à valider'
                   : `${nombre} action${nombre > 1 ? 's' : ''}`}
               </span>
-            </Link>
+
+              {aConfirmer === cr.id ? (
+                <div className="flex shrink-0 items-center gap-2 text-xs">
+                  <span className="text-slate-500">Confirmer ?</span>
+                  <button
+                    onClick={() => supprimer(cr.id)}
+                    className="text-red-700 hover:underline"
+                  >
+                    Oui
+                  </button>
+                  <button
+                    onClick={() => setAConfirmer(null)}
+                    className="text-slate-500 hover:underline"
+                  >
+                    Non
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setAConfirmer(cr.id)}
+                  className="shrink-0 text-xs text-slate-400 hover:text-red-700"
+                >
+                  Supprimer
+                </button>
+              )}
+            </div>
           );
         })}
       </div>
