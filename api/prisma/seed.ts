@@ -2,13 +2,7 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-const TEXTE_QUIZZ_PLUS = `Réunion Projet Quizz+ — 27 juillet 2026
-
-Points abordés :
-- Publier la nouvelle version sur le Play Store avant le 05/08/2026
-- Corriger le bug bloquant du classement des joueurs
-- Envoyer un message aux testeurs (Responsable : Fatou)
-- Vérifier la fiche Play Store`;
+const TEXTE_QUIZZ_PLUS = `L'équipe confirme que la version Android doit être disponible pour les prochains tests utilisateurs. Abdou doit vérifier la configuration Play Store avant jeudi. Awa doit corriger les erreurs signalées sur le classement avant vendredi. Mamadou préparera le message destiné aux testeurs et devra le faire valider avant mercredi soir. La date de lancement ne pourra être confirmée qu'après les tests. Une nouvelle réunion est prévue vendredi à 15 heures. Le budget de la campagne de lancement n'a pas encore été validé.`;
 
 async function main() {
   await prisma.action.deleteMany();

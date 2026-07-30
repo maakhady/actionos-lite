@@ -87,4 +87,26 @@ describe('RulesExtractor', () => {
 
     expect(actions).toHaveLength(0);
   });
+
+  it('extrait les actions du CR Quizz+ en prose continue', async () => {
+    const texte = `L'équipe confirme que la version Android doit être disponible pour les prochains tests utilisateurs. Abdou doit vérifier la configuration Play Store avant jeudi. Awa doit corriger les erreurs signalées sur le classement avant vendredi. Mamadou préparera le message destiné aux testeurs et devra le faire valider avant mercredi soir. La date de lancement ne pourra être confirmée qu'après les tests. Une nouvelle réunion est prévue vendredi à 15 heures. Le budget de la campagne de lancement n'a pas encore été validé.`;
+
+    const actions = await extractor.extract(texte, DATE_REF);
+
+    const abdou = actions.find((a) => a.responsable === 'Abdou');
+    expect(abdou?.echeance?.toISOString()).toContain('2026-07-30');
+
+    const awa = actions.find((a) => a.responsable === 'Awa');
+    expect(awa?.echeance?.toISOString()).toContain('2026-07-31');
+
+    const mamadou = actions.find((a) => a.responsable === 'Mamadou');
+    expect(mamadou?.echeance?.toISOString()).toContain('2026-07-29');
+
+    const aConfirmer = actions.filter(
+      (a) => a.responsable === null && a.echeance === null,
+    );
+    expect(aConfirmer.length).toBeGreaterThanOrEqual(2);
+
+    expect(actions).toHaveLength(5);
+  });
 });
