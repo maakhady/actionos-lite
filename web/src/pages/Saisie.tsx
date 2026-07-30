@@ -8,6 +8,53 @@ const EXEMPLE = {
   texteSource: `L'équipe confirme que la version Android doit être disponible pour les prochains tests utilisateurs. Abdou doit vérifier la configuration Play Store avant jeudi. Awa doit corriger les erreurs signalées sur le classement avant vendredi. Mamadou préparera le message destiné aux testeurs et devra le faire valider avant mercredi soir. La date de lancement ne pourra être confirmée qu'après les tests. Une nouvelle réunion est prévue vendredi à 15 heures. Le budget de la campagne de lancement n'a pas encore été validé.`,
 };
 
+const MOIS: Record<string, number> = {
+  janvier: 0,
+  février: 1,
+  fevrier: 1,
+  mars: 2,
+  avril: 3,
+  mai: 4,
+  juin: 5,
+  juillet: 6,
+  août: 7,
+  aout: 7,
+  septembre: 8,
+  octobre: 9,
+  novembre: 10,
+  décembre: 11,
+  decembre: 11,
+};
+
+// Pré-remplissage uniquement : le champ reste modifiable et le bouton
+// Analyser reste bloqué tant qu'il n'est pas rempli, rien n'est deviné en
+// silence.
+function detecterTitre(texte: string): string | null {
+  const premiereLigne = texte.split(/\r?\n/).find((l) => l.trim().length > 0);
+  if (!premiereLigne) return null;
+  const nettoyee = premiereLigne.replace(/^compte[\s-]?rendu\s*[—:-]?\s*/i, '').trim();
+  return nettoyee || null;
+}
+
+function detecterDate(texte: string): string | null {
+  const textuelle = texte.match(
+    /(\d{1,2})\s+(janvier|février|fevrier|mars|avril|mai|juin|juillet|août|aout|septembre|octobre|novembre|décembre|decembre)\s+(\d{4})/i,
+  );
+  if (textuelle) {
+    const [, jour, mois, annee] = textuelle;
+    const indexMois = MOIS[mois.toLowerCase()];
+    return `${annee}-${String(indexMois + 1).padStart(2, '0')}-${jour.padStart(2, '0')}`;
+  }
+
+  const numerique = texte.match(/(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})/);
+  if (numerique) {
+    const [, jour, mois, annee] = numerique;
+    return `${annee}-${mois.padStart(2, '0')}-${jour.padStart(2, '0')}`;
+  }
+
+  return null;
+}
+
 export default function Saisie() {
   const navigate = useNavigate();
   const [titre, setTitre] = useState('');
@@ -16,11 +63,35 @@ export default function Saisie() {
   const [erreur, setErreur] = useState<string | null>(null);
   const [enCours, setEnCours] = useState(false);
 
+  // Tant que l'utilisateur n'a pas touché le champ lui-même, on continue de
+  // le resynchroniser avec ce qui est détecté dans le texte (couvre le
+  // copier-coller comme la frappe caractère par caractère).
+  const [titreAuto, setTitreAuto] = useState(true);
+  const [dateAuto, setDateAuto] = useState(true);
+
   const chargerExemple = () => {
     setTitre(EXEMPLE.titre);
     setDateReunion(EXEMPLE.dateReunion);
     setTexteSource(EXEMPLE.texteSource);
+    setTitreAuto(false);
+    setDateAuto(false);
     setErreur(null);
+  };
+
+  const changerTexte = (valeur: string) => {
+    setTexteSource(valeur);
+    if (titreAuto) setTitre(detecterTitre(valeur) ?? '');
+    if (dateAuto) setDateReunion(detecterDate(valeur) ?? '');
+  };
+
+  const changerTitre = (valeur: string) => {
+    setTitreAuto(false);
+    setTitre(valeur);
+  };
+
+  const changerDate = (valeur: string) => {
+    setDateAuto(false);
+    setDateReunion(valeur);
   };
 
   const analyser = async () => {
@@ -50,7 +121,7 @@ export default function Saisie() {
             <span className="text-xs text-slate-500">Titre</span>
             <input
               value={titre}
-              onChange={(e) => setTitre(e.target.value)}
+              onChange={(e) => changerTitre(e.target.value)}
               placeholder="Réunion hebdomadaire produit"
               className="mt-1 w-full rounded-md border border-bordure bg-white px-3 py-2 text-sm outline-none focus:border-or-500"
             />
@@ -61,7 +132,7 @@ export default function Saisie() {
             <input
               type="date"
               value={dateReunion}
-              onChange={(e) => setDateReunion(e.target.value)}
+              onChange={(e) => changerDate(e.target.value)}
               className="mt-1 w-full rounded-md border border-bordure bg-white px-3 py-2 text-sm outline-none focus:border-or-500"
             />
           </label>
@@ -71,7 +142,7 @@ export default function Saisie() {
           <span className="text-xs text-slate-500">Compte rendu</span>
           <textarea
             value={texteSource}
-            onChange={(e) => setTexteSource(e.target.value)}
+            onChange={(e) => changerTexte(e.target.value)}
             rows={12}
             placeholder="Collez ici le texte de la réunion, en prose ou en liste à puces."
             className="mt-1 w-full rounded-md border border-bordure bg-white px-3 py-2 text-sm leading-relaxed outline-none focus:border-or-500"
