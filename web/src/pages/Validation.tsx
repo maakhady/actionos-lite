@@ -3,26 +3,41 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { actions as apiActions, comptesRendus } from '../api';
 import type { ActionBrouillon, CompteRendu, Priorite } from '../types';
 
+// Une fois enregistrées, les actions ont un id : on peut alors les corriger
+// une par une (PATCH) directement depuis cette page.
+type Brouillon = ActionBrouillon & { id?: string };
+
 const PRIORITES: Priorite[] = ['BASSE', 'MOYENNE', 'HAUTE'];
 
 const LIBELLE_PRIORITE: Record<Priorite, string> = {
-  BASSE: 'Basse',
+  BASSE: 'Faible',
   MOYENNE: 'Moyenne',
   HAUTE: 'Haute',
 };
+
+// Couleurs neutres (ni rouge ni doré : ces deux-là sont réservés au retard
+// et au « à confirmer », voir section 7 du contexte).
+const COULEUR_PRIORITE: Record<Priorite, string> = {
+  BASSE: 'border border-bordure text-slate-500',
+  MOYENNE: 'bg-ardoise-100 text-encre',
+  HAUTE: 'bg-marine-900 text-white',
+};
+
+const jourDeLaSemaine = (echeance: string) =>
+  new Date(echeance).toLocaleDateString('fr-FR', { weekday: 'long' });
 
 const ACTION_VIDE: ActionBrouillon = {
   description: '',
   responsable: null,
   echeance: null,
-  priorite: 'MOYENNE',
+  priorite: 'BASSE',
 };
 
 export default function Validation() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [compteRendu, setCompteRendu] = useState<CompteRendu | null>(null);
-  const [brouillons, setBrouillons] = useState<ActionBrouillon[]>([]);
+  const [brouillons, setBrouillons] = useState<Brouillon[]>([]);
   const [erreur, setErreur] = useState<string | null>(null);
   const [chargement, setChargement] = useState(true);
   const [enCours, setEnCours] = useState(false);
@@ -60,6 +75,20 @@ export default function Validation() {
           : action,
       ),
     );
+  };
+
+  // Une action déjà enregistrée (elle a un id) se corrige tout de suite,
+  // champ par champ, plutôt que via le bouton "Enregistrer" global.
+  const enregistrerChamp = async (
+    action: Brouillon,
+    donnees: Partial<ActionBrouillon>,
+  ) => {
+    if (!action.id) return;
+    try {
+      await apiActions.modifier(action.id, donnees);
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : 'Modification impossible');
+    }
   };
 
   const supprimer = (index: number) =>
@@ -104,11 +133,8 @@ export default function Validation() {
 
       {dejaValide && (
         <div className="mt-4 rounded-md border border-bordure bg-ardoise-100 px-4 py-3 text-sm text-encre">
-          Ce compte rendu a déjà été validé. Les actions se modifient depuis le{' '}
-          <Link to="/suivi" className="text-or-600 underline underline-offset-2">
-            tableau de suivi
-          </Link>
-          .
+          Ce compte rendu a déjà été validé. Vous pouvez encore corriger les
+          champs ci-dessous ; chaque modification est enregistrée aussitôt.
         </div>
       )}
 
@@ -126,9 +152,11 @@ export default function Validation() {
                 <input
                   value={action.description}
                   onChange={(e) => modifier(index, 'description', e.target.value)}
-                  disabled={dejaValide}
+                  onBlur={() =>
+                    void enregistrerChamp(action, { description: action.description })
+                  }
                   placeholder="Description de l'action"
-                  className="flex-1 rounded-md border border-transparent bg-transparent px-2 py-1 text-sm outline-none hover:border-bordure focus:border-or-500 focus:bg-white disabled:hover:border-transparent"
+                  className="flex-1 rounded-md border border-bordure bg-white px-2 py-1 text-sm outline-none focus:border-or-500"
                 />
                 {incomplete && (
                   <span className="shrink-0 rounded-full bg-white px-2 py-0.5 text-xs text-or-600">
@@ -151,22 +179,29 @@ export default function Validation() {
                   <input
                     value={action.responsable ?? ''}
                     onChange={(e) => modifier(index, 'responsable', e.target.value)}
-                    disabled={dejaValide}
+                    onBlur={() =>
+                      void enregistrerChamp(action, { responsable: action.responsable })
+                    }
                     placeholder="non précisé"
-                    className={`mt-1 w-full rounded-md border bg-white px-2 py-1.5 text-sm outline-none focus:border-or-500 disabled:bg-transparent ${
+                    className={`mt-1 w-full rounded-md border bg-white px-2 py-1.5 text-sm outline-none focus:border-or-500 ${
                       action.responsable ? 'border-bordure' : 'border-or-500'
                     }`}
                   />
                 </label>
 
                 <label className="block">
-                  <span className="text-xs text-slate-500">Échéance</span>
+                  <span className="text-xs text-slate-500">
+                    Échéance
+                    {action.echeance && ` · ${jourDeLaSemaine(action.echeance)}`}
+                  </span>
                   <input
                     type="date"
                     value={action.echeance ? action.echeance.slice(0, 10) : ''}
                     onChange={(e) => modifier(index, 'echeance', e.target.value)}
-                    disabled={dejaValide}
-                    className={`mt-1 w-full rounded-md border bg-white px-2 py-1.5 text-sm outline-none focus:border-or-500 disabled:bg-transparent ${
+                    onBlur={() =>
+                      void enregistrerChamp(action, { echeance: action.echeance })
+                    }
+                    className={`mt-1 w-full rounded-md border bg-white px-2 py-1.5 text-sm outline-none focus:border-or-500 ${
                       action.echeance ? 'border-bordure' : 'border-or-500'
                     }`}
                   />
@@ -174,11 +209,20 @@ export default function Validation() {
 
                 <label className="block">
                   <span className="text-xs text-slate-500">Priorité</span>
+                  <span
+                    className={`ml-2 rounded-full px-2 py-0.5 text-xs ${COULEUR_PRIORITE[action.priorite]}`}
+                  >
+                    {LIBELLE_PRIORITE[action.priorite]}
+                  </span>
                   <select
                     value={action.priorite}
-                    onChange={(e) => modifier(index, 'priorite', e.target.value)}
-                    disabled={dejaValide}
-                    className="mt-1 w-full rounded-md border border-bordure bg-white px-2 py-1.5 text-sm outline-none focus:border-or-500 disabled:bg-transparent"
+                    onChange={(e) => {
+                      modifier(index, 'priorite', e.target.value);
+                      void enregistrerChamp(action, {
+                        priorite: e.target.value as Priorite,
+                      });
+                    }}
+                    className="mt-1 w-full rounded-md border border-bordure bg-white px-2 py-1.5 text-sm outline-none focus:border-or-500"
                   >
                     {PRIORITES.map((p) => (
                       <option key={p} value={p}>

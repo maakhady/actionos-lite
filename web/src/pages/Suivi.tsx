@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { actions as apiActions } from '../api';
-import type { Action, Statut } from '../types';
+import type { Action, Priorite, Statut } from '../types';
 
 const STATUTS: Statut[] = ['A_FAIRE', 'EN_COURS', 'TERMINE'];
 
@@ -8,6 +8,20 @@ const LIBELLE_STATUT: Record<Statut, string> = {
   A_FAIRE: 'À faire',
   EN_COURS: 'En cours',
   TERMINE: 'Terminé',
+};
+
+const LIBELLE_PRIORITE: Record<Priorite, string> = {
+  BASSE: 'Faible',
+  MOYENNE: 'Moyenne',
+  HAUTE: 'Haute',
+};
+
+// Couleurs neutres (ni rouge ni doré : ces deux-là sont réservés au retard
+// et au « à confirmer », voir section 7 du contexte).
+const COULEUR_PRIORITE: Record<Priorite, string> = {
+  BASSE: 'border border-bordure text-slate-500',
+  MOYENNE: 'bg-ardoise-100 text-encre',
+  HAUTE: 'bg-marine-900 text-white',
 };
 
 const estEnRetard = (action: Action) =>
@@ -126,6 +140,12 @@ export default function Suivi() {
                 incomplete ? 'bg-or-100' : ''
               }`}
             >
+              <span
+                className={`shrink-0 rounded-full px-2 py-0.5 text-xs ${COULEUR_PRIORITE[action.priorite]}`}
+              >
+                {LIBELLE_PRIORITE[action.priorite]}
+              </span>
+
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm text-encre">{action.description}</p>
                 <p className="mt-0.5 text-xs text-slate-500">
@@ -144,7 +164,12 @@ export default function Suivi() {
                 }`}
               >
                 {action.echeance
-                  ? new Date(action.echeance).toLocaleDateString('fr-FR')
+                  ? new Date(action.echeance).toLocaleDateString('fr-FR', {
+                      weekday: 'long',
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                    })
                   : 'échéance à confirmer'}
                 {retard && ' · en retard'}
               </span>
