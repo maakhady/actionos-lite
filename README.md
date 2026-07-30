@@ -6,7 +6,7 @@ MVP — cas pratique technique DIZIGROUP (réf. DFSJIA-001, Développeur Full St
 
 On colle le texte d'un compte rendu de réunion (prose libre ou liste à puces), l'outil en extrait des propositions d'actions (description, responsable, échéance, priorité), un humain les relit — corrige, complète, supprime — avant de les enregistrer. Elles sont ensuite suivies dans un tableau : filtre par statut, changement de statut, détection des retards.
 
-Contrainte structurante du client : **le MVP doit fonctionner sans dépendre d'une IA.** L'extraction est un moteur de règles déterministe ; l'IA n'a pas été branchée dans cette version (voir [section 6](#6-usage-de-lia)).
+Contrainte structurante du client : **le MVP doit fonctionner sans dépendre d'une IA.** L'extraction repose sur un moteur de règles déterministe ; une IA optionnelle peut s'y ajouter en complément, jamais en remplacement (voir [section 6](#6-usage-de-lia)).
 
 Le fil rouge du produit : *l'outil ne devine pas, il vous dit ce qu'il ne sait pas.* Quand le texte ne précise ni responsable ni échéance, le champ reste vide et l'action remonte comme « à confirmer » plutôt que d'inventer une valeur.
 
@@ -17,7 +17,7 @@ Le fil rouge du produit : *l'outil ne devine pas, il vous dit ce qu'il ne sait p
 | Frontend | React 19 + Vite, Tailwind CSS |
 | Backend | NestJS 11 + Prisma 6 |
 | Base de données | PostgreSQL 16 (Docker) |
-| Tests | Jest (10 tests unitaires sur l'extracteur) |
+| Tests | Jest (16 tests unitaires sur l'extraction) |
 
 ## 3. Installation (clone vierge)
 
@@ -46,7 +46,12 @@ npx prisma db seed
 npm run start:dev
 ```
 
-L'API écoute sur `http://localhost:3000`. `npm test` fait tourner les 10 tests unitaires de l'extracteur.
+L'API écoute sur `http://localhost:3000`. `npm test` fait tourner les 16 tests unitaires de l'extraction.
+
+**IA optionnelle** : sans clé, l'extraction reste 100 % déterministe. Pour l'activer, ajouter dans `api/.env` :
+```
+ANTHROPIC_API_KEY=sk-ant-...
+```
 
 ### 3.3 Front
 
@@ -99,6 +104,10 @@ Détail complet des fonctionnalités écartées et pourquoi : voir `NOTE-CADRAGE
 
 ## 6. Usage de l'IA
 
-**Aucune IA n'est branchée dans cette version.** L'extraction des actions est intégralement assurée par `RulesExtractor`, un moteur de règles déterministe et testé (10 tests unitaires), sans appel à un modèle de langage.
+**L'IA est optionnelle et n'est jamais requise.** Par défaut (sans `ANTHROPIC_API_KEY`), l'extraction est intégralement assurée par `RulesExtractor`, un moteur de règles déterministe et testé — conforme à la consigne du client : « le MVP doit fonctionner sans dépendre d'une IA ».
 
-Ce choix est un arbitrage de temps assumé, pas un oubli : le client demande explicitement que « le MVP fonctionne sans dépendre d'une IA » et qu'une « solution simple terminée vaille mieux qu'une solution ambitieuse inachevée ». L'architecture le permet sans réécriture : `ActionExtractor` est une interface, `RulesExtractor` en est la seule implémentation aujourd'hui, mais un `AiExtractor` pourrait l'implémenter demain et être branché par un simple changement de provider NestJS, avec repli automatique sur les règles en cas d'échec (clé absente, timeout, JSON invalide). Si elle existait, cette couche IA resterait soumise à la même contrainte que les règles : ne jamais inventer un responsable ou une échéance absents du texte, et toujours passer par la validation humaine avant enregistrement.
+Si une clé est configurée, `AiExtractor` (Claude Haiku 4.5) est essayé en premier, via des **sorties structurées** (le JSON renvoyé est garanti conforme à un schéma, pas parsé depuis du texte libre). En cas d'échec — clé invalide, timeout, quota dépassé, réponse malformée — `FallbackExtractor` retombe automatiquement et silencieusement sur `RulesExtractor`. Aucun chemin ne peut planter l'analyse à cause de l'IA.
+
+Le prompt impose explicitement de ne jamais inventer un responsable ou une échéance absents du texte (`null` sinon) — la même règle que le moteur déterministe. Que l'action vienne des règles, de l'IA ou d'un ajout manuel, elle passe par la **même validation humaine obligatoire** avant tout enregistrement, et porte un badge d'origine (`Règle` / `IA` / `Manuel`) visible dans l'interface.
+
+`ANTHROPIC_API_KEY` se configure uniquement côté serveur, dans `api/.env` — jamais dans le code, jamais côté front, jamais commité (`.env` est ignoré par git).
