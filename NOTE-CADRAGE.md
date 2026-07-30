@@ -45,4 +45,14 @@ Par ordre de priorité si le projet continue :
 
 ## 5. Temps consacré
 
-**4h15** de travail effectif déclaré.
+**6h45** de travail effectif déclaré.
+
+## 6. Usage de l'IA pendant le développement
+
+Déclaration distincte de la couche IA optionnelle du produit (section 1) : ce point concerne l'usage de l'IA par le candidat comme outil de développement.
+
+- **Outil** : Claude Code (Anthropic), utilisé en binôme  — code, tests, documentation.
+- **Résultats vérifiés** : chaque modification relue et comprise avant acceptation ; tests unitaires exécutés et vérifiés au vert avant chaque commit.
+- **Validation humaine obligatoire** : aucune décision d'architecture, de nommage ou de dépendance n'est prise par l'IA seule — chaque choix est proposé, expliqué, puis validé explicitement par le candidat avant écriture.
+- **Solution utilisable sans IA** : ce mode de travail ne crée aucune dépendance à l'IA côté produit ; le MVP fonctionne intégralement sans clé IA (voir section 1 et README section 6).
+- **Limites** : le candidat reste responsable du code et capable de le défendre ligne par ligne en démo ; l'IA accélère l'écriture, elle ne remplace pas la compréhension.
