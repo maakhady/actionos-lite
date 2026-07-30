@@ -54,7 +54,7 @@ const MARQUEURS_BASSE =
   /\b(si possible|plus tard|secondaire|optionnel|à terme|quand possible)\b/i;
 
 export class RulesExtractor implements ActionExtractor {
-  extract(texte: string): Promise<ActionBrouillon[]> {
+  extract(texte: string, dateReunion: Date): Promise<ActionBrouillon[]> {
     const actions = this.decouperEnLignes(texte)
       .filter((ligne) => this.estUneAction(ligne))
       .map((ligne) => this.construireAction(ligne));

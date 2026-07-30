@@ -24,7 +24,7 @@ export class ComptesRendusController {
 
   @Post('analyser')
   analyser(@Body() dto: AnalyserDto) {
-    return this.service.analyser(dto.texteSource);
+    return this.service.analyser(dto.texteSource, dto.dateReunion);
   }
 
   @Get()

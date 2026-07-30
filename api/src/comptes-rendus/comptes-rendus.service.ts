@@ -45,7 +45,7 @@ export class ComptesRendusService {
     return this.prisma.compteRendu.delete({ where: { id } });
   }
 
-  analyser(texte: string) {
-    return this.extraction.extraire(texte);
+  analyser(texte: string, dateReunion: Date) {
+    return this.extraction.extraire(texte, dateReunion);
   }
 }

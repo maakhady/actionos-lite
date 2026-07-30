@@ -9,7 +9,7 @@ export class ExtractionService {
     @Inject(ACTION_EXTRACTOR) private readonly extractor: ActionExtractor,
   ) {}
 
-  extraire(texte: string): Promise<ActionBrouillon[]> {
-    return this.extractor.extract(texte);
+  extraire(texte: string, dateReunion: Date): Promise<ActionBrouillon[]> {
+    return this.extractor.extract(texte, dateReunion);
   }
 }
