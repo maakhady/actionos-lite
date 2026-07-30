@@ -22,6 +22,26 @@ const VERBES_ACTION = [
   'rédiger',
   'déployer',
   'partager',
+  // Ajoutés après test sur un compte rendu réel (vocabulaire technique/produit).
+  'analyser',
+  'reproduire',
+  'revoir',
+  'intègre', // radical change d'accent (intégrer → il intègre), ajouté tel quel
+  'résoudre',
+  'planifier',
+  'livrer',
+  'lancer',
+  'identifier',
+  'documenter',
+  'installer',
+  'configurer',
+  'ouvrir',
+  'transmettre',
+  'présenter',
+  'appeler',
+  'rappeler',
+  'signaler',
+  'suivre',
 ];
 
 // Mots capitalisés en tête de phrase qui ne sont jamais un prénom (sujet-verbe).

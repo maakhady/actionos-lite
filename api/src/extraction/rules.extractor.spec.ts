@@ -109,4 +109,18 @@ describe('RulesExtractor', () => {
 
     expect(actions).toHaveLength(5);
   });
+
+  it('reconnaît les verbes ajoutés après test sur un compte rendu réel', async () => {
+    const phrases = [
+      'Cheikh analyse les logs du webhook.',
+      'Aïssatou intègre les fiches produits avant le 8 août.',
+      'Reproduire le bug de connexion signalé par le support.',
+      'Modou revoit le template newsletter.',
+    ];
+
+    for (const phrase of phrases) {
+      const actions = await extractor.extract(phrase, DATE_REF);
+      expect(actions).toHaveLength(1);
+    }
+  });
 });

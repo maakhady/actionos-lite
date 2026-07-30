@@ -38,9 +38,10 @@ L'extraction est déterministe (moteur de règles), fonctionne aussi bien sur de
 Par ordre de priorité si le projet continue :
 
 1. Déploiement en ligne (API + front) pour lever le risque « application impossible à lancer ».
-2. Authentification simple si l'outil doit être partagé par plusieurs personnes.
-3. Notifications sur les échéances à venir ou dépassées.
-4. Import de documents (.docx) comme alternative au copier-coller.
+2. Détection de « prochaine réunion » (date/heure du prochain rendez-vous mentionné dans le texte) comme information affichée à part, distincte des actions. Écarté pour l'instant : le texte source complet reste consultable sur la page de validation, l'humain peut déjà repérer ce type de mention en le relisant.
+3. Authentification simple si l'outil doit être partagé par plusieurs personnes.
+4. Notifications sur les échéances à venir ou dépassées.
+5. Import de documents (.docx) comme alternative au copier-coller.
 
 ## 5. Temps consacré
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { actions as apiActions } from '../api';
 import type { Action, Origine, Priorite, Statut } from '../types';
 
@@ -36,10 +37,12 @@ const estEnRetard = (action: Action) =>
   new Date(action.echeance) < new Date(new Date().toDateString());
 
 export default function Suivi() {
+  const navigate = useNavigate();
   const [liste, setListe] = useState<Action[]>([]);
   const [filtre, setFiltre] = useState<Statut | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
   const [chargement, setChargement] = useState(true);
+  const [selection, setSelection] = useState<Action | null>(null);
 
   const charger = async (statut: Statut | null) => {
     setChargement(true);
@@ -156,8 +159,13 @@ export default function Suivi() {
                 {LIBELLE_ORIGINE[action.origine]}
               </span>
 
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm text-encre">{action.description}</p>
+              <div
+                className="min-w-0 flex-1 cursor-pointer"
+                onClick={() => setSelection(action)}
+              >
+                <p className="truncate text-sm text-encre hover:underline">
+                  {action.description}
+                </p>
                 <p className="mt-0.5 text-xs text-slate-500">
                   {action.compteRendu?.titre}
                   {action.responsable ? (
@@ -206,6 +214,89 @@ export default function Suivi() {
           );
         })}
       </div>
+
+      {selection && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setSelection(null)}
+        >
+          <div
+            className="w-full max-w-md rounded-xl bg-white p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <h2 className="text-base text-encre">{selection.description}</h2>
+              <button
+                onClick={() => setSelection(null)}
+                className="shrink-0 text-slate-400 hover:text-encre"
+              >
+                ✕
+              </button>
+            </div>
+
+            <dl className="mt-4 space-y-2 text-sm">
+              <div className="flex justify-between gap-3">
+                <dt className="text-slate-500">Responsable</dt>
+                <dd className={selection.responsable ? 'text-encre' : 'text-or-600'}>
+                  {selection.responsable ?? 'à confirmer'}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-slate-500">Échéance</dt>
+                <dd className={selection.echeance ? 'text-encre' : 'text-or-600'}>
+                  {selection.echeance
+                    ? new Date(selection.echeance).toLocaleDateString('fr-FR', {
+                        weekday: 'long',
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                      })
+                    : 'à confirmer'}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-slate-500">Priorité</dt>
+                <dd className="text-encre">{LIBELLE_PRIORITE[selection.priorite]}</dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-slate-500">Statut</dt>
+                <dd className="text-encre">{LIBELLE_STATUT[selection.statut]}</dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-slate-500">Origine</dt>
+                <dd className="text-encre">{LIBELLE_ORIGINE[selection.origine]}</dd>
+              </div>
+            </dl>
+
+            {selection.compteRendu && (
+              <div className="mt-5 border-t border-bordure pt-4">
+                <p className="text-xs text-slate-500">Compte rendu d'origine</p>
+                <p className="text-sm text-encre">{selection.compteRendu.titre}</p>
+                <p className="text-xs text-slate-500">
+                  {new Date(selection.compteRendu.dateReunion).toLocaleDateString(
+                    'fr-FR',
+                  )}
+                </p>
+              </div>
+            )}
+
+            <div className="mt-5 flex justify-end gap-3">
+              <button
+                onClick={() => setSelection(null)}
+                className="px-3 py-2 text-sm text-slate-500 hover:text-encre"
+              >
+                Fermer
+              </button>
+              <button
+                onClick={() => navigate(`/validation/${selection.compteRenduId}`)}
+                className="rounded-md bg-or-500 px-4 py-2 text-sm text-white hover:bg-or-600"
+              >
+                Voir le compte rendu
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -17,7 +17,7 @@ Le fil rouge du produit : *l'outil ne devine pas, il vous dit ce qu'il ne sait p
 | Frontend | React 19 + Vite, Tailwind CSS |
 | Backend | NestJS 11 + Prisma 6 |
 | Base de données | PostgreSQL 16 (Docker) |
-| Tests | Jest (16 tests unitaires sur l'extraction) |
+| Tests | Jest (17 tests unitaires sur l'extraction) |
 
 ## 3. Installation (clone vierge)
 
@@ -46,7 +46,7 @@ npx prisma db seed
 npm run start:dev
 ```
 
-L'API écoute sur `http://localhost:3000`. `npm test` fait tourner les 16 tests unitaires de l'extraction.
+L'API écoute sur `http://localhost:3000`. `npm test` fait tourner les 17 tests unitaires de l'extraction.
 
 **IA optionnelle** : sans clé, l'extraction reste 100 % déterministe. Pour l'activer, ajouter dans `api/.env` :
 ```

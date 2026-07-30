@@ -32,7 +32,9 @@ export class ActionsService {
     return this.prisma.action.findMany({
       where: statut ? { statut } : undefined,
       orderBy: [{ echeance: 'asc' }, { createdAt: 'desc' }],
-      include: { compteRendu: { select: { id: true, titre: true } } },
+      include: {
+        compteRendu: { select: { id: true, titre: true, dateReunion: true } },
+      },
     });
   }
 

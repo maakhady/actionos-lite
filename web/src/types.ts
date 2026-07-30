@@ -14,7 +14,7 @@ export interface Action extends ActionBrouillon {
   id: string;
   compteRenduId: string;
   statut: Statut;
-  compteRendu?: { id: string; titre: string };
+  compteRendu?: { id: string; titre: string; dateReunion: string };
 }
 
 export interface CompteRendu {

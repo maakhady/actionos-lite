@@ -130,6 +130,17 @@ export default function Validation() {
           {compteRendu && new Date(compteRendu.dateReunion).toLocaleDateString('fr-FR')}
         </span>
       </div>
+      {compteRendu && (
+        <details className="mt-3 rounded-md border border-bordure bg-white">
+          <summary className="cursor-pointer px-4 py-2 text-sm text-slate-500 hover:text-encre">
+            Voir le texte source du compte rendu
+          </summary>
+          <p className="whitespace-pre-wrap border-t border-bordure px-4 py-3 text-sm text-encre">
+            {compteRendu.texteSource}
+          </p>
+        </details>
+      )}
+
       <p className="mt-1 text-sm text-slate-500">
         {brouillons.length} action{brouillons.length > 1 ? 's' : ''}{' '}
         {dejaValide ? 'enregistrée' : 'détectée'}
