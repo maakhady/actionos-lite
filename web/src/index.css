@@ -1,0 +1,16 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-marine-900: #0F1F35;
+  --color-marine-800: #14263D;
+
+  --color-or-600: #B8801F;
+  --color-or-500: #C8912B;
+  --color-or-100: #FDEFD4;
+
+  --color-ardoise-50: #F5F7FA;
+  --color-ardoise-100: #EAF0F7;
+
+  --color-bordure: #E3E8EF;
+  --color-encre: #1B2A41;
+}
