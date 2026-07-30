@@ -4,7 +4,7 @@ MVP — cas pratique technique DIZIGROUP (réf. DFSJIA-001, Développeur Full St
 
 ## 1. Objectif
 
-On colle le texte d'un compte rendu de réunion (prose libre ou liste à puces), l'outil en extrait des propositions d'actions (description, responsable, échéance, priorité), un humain les relit — corrige, complète, supprime — avant de les enregistrer. Elles sont ensuite suivies dans un tableau : filtre par statut, changement de statut, détection des retards.
+On colle le texte d'un compte rendu de réunion (prose libre ou liste à puces) — titre et date se pré-remplissent depuis le texte s'ils y figurent —, l'outil en extrait des propositions d'actions (description, responsable, échéance, priorité), un humain les relit — corrige, complète, supprime — avant de les enregistrer. Elles sont ensuite suivies dans un tableau : filtre par statut, changement de statut, détection des retards, avec un retour direct vers le compte rendu d'origine depuis chaque action.
 
 Contrainte structurante du client : **le MVP doit fonctionner sans dépendre d'une IA.** L'extraction repose sur un moteur de règles déterministe ; une IA optionnelle peut s'y ajouter en complément, jamais en remplacement (voir [section 6](#6-usage-de-lia)).
 

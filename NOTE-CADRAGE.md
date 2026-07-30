@@ -6,14 +6,14 @@ Cas pratique technique DIZIGROUP (réf. DFSJIA-001).
 
 Les 6 fonctionnalités obligatoires du barème sont implémentées et fonctionnelles :
 
-1. **Compte rendu** — création (titre, date, texte collé), persistance en base.
-2. **Actions** — reliées à leur compte rendu d'origine.
+1. **Compte rendu** — création (titre, date, texte collé), persistance en base. Titre et date se pré-remplissent depuis le texte collé s'ils y figurent (reste modifiable, rien n'est deviné en silence).
+2. **Actions** — reliées à leur compte rendu d'origine ; cliquer sur une action dans le tableau de suivi ouvre un résumé avec un lien direct vers son compte rendu.
 3. **Champs clés** — description, responsable, échéance, priorité sur chaque action.
 4. **Validation humaine** — relecture, correction, suppression, complément avant enregistrement ; les corrections restent possibles après coup depuis la page du compte rendu.
-5. **Tableau de suivi** — filtre par statut, changement de statut, détection des retards (calculée à l'affichage, jamais stockée).
+5. **Tableau de suivi** — filtre par statut, changement de statut, détection des retards (calculée à l'affichage, jamais stockée), pagination (7 par page).
 6. **Persistance** — les données survivent à une actualisation (PostgreSQL).
 
-L'extraction est déterministe (moteur de règles), fonctionne aussi bien sur des puces que sur de la prose continue, et ne remonte jamais un responsable ou une échéance inventés : l'information manquante reste `null` et l'action remonte comme « à confirmer ».
+L'extraction est déterministe (moteur de règles), fonctionne aussi bien sur des puces que sur de la prose continue, et ne remonte jamais un responsable ou une échéance inventés : l'information manquante reste `null` et l'action remonte comme « à confirmer ». Testée et étoffée (liste de verbes élargie) contre un compte rendu externe réel, distinct de l'exemple imposé, pour vérifier qu'elle généralise au-delà du seul cas Quizz+.
 
 **Bonus retenu — couche IA optionnelle.** `AiExtractor` (Claude Haiku 4.5, sorties structurées) peut compléter les règles si `ANTHROPIC_API_KEY` est configurée, avec repli automatique sur `RulesExtractor` en cas d'échec. Badge d'origine (`Règle` / `IA` / `Manuel`) visible sur chaque action. Voir section 6 du README.
 
@@ -29,7 +29,7 @@ L'extraction est déterministe (moteur de règles), fonctionne aussi bien sur de
 
 ## 3. Risques identifiés
 
-- **Extraction incomplète sur des formats inhabituels.** Le moteur de règles reconnaît des motifs connus (puces, verbes d'action, structure « Prénom doit… », marqueurs d'incertitude). Un texte structuré très différemment pourrait faire manquer une action. Rattrapé par la validation humaine obligatoire avant tout enregistrement.
+- **Extraction incomplète sur des formats inhabituels.** Le moteur de règles reconnaît des motifs connus (puces, verbes d'action, structure « Prénom doit… », marqueurs d'incertitude). Un texte structuré très différemment pourrait faire manquer une action — constaté et corrigé une fois (liste de verbes élargie après test sur un compte rendu externe réel), mais une liste de verbes ne pourra jamais couvrir tout le français. Rattrapé par la validation humaine obligatoire avant tout enregistrement, et par le texte source toujours consultable en relecture.
 - **Hallucination de l'IA.** Un LLM pourrait inventer un responsable ou une échéance absents du texte. Parade : prompt imposant explicitement `null` quand l'information n'est pas dans le texte, plus la même validation humaine obligatoire que pour les règles, inchangée quelle que soit l'origine de l'action.
 - **Clé API exposée.** Parade structurelle : `ANTHROPIC_API_KEY` vit uniquement dans `api/.env` (ignoré par git), lu côté serveur, jamais transmis au front. Sans clé configurée, l'app fonctionne normalement (règles seules).
 
