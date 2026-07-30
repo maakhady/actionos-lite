@@ -10,9 +10,16 @@ export enum Statut {
   TERMINE = 'TERMINE',
 }
 
+export enum Origine {
+  REGLE = 'REGLE',
+  IA = 'IA',
+  MANUEL = 'MANUEL',
+}
+
 export interface ActionBrouillon {
   description: string;
   responsable: string | null;
   echeance: Date | null;
   priorite: Priorite;
+  origine: Origine;
 }

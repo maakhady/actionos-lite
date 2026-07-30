@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { actions as apiActions } from '../api';
-import type { Action, Priorite, Statut } from '../types';
+import type { Action, Origine, Priorite, Statut } from '../types';
 
 const STATUTS: Statut[] = ['A_FAIRE', 'EN_COURS', 'TERMINE'];
 
@@ -8,6 +8,12 @@ const LIBELLE_STATUT: Record<Statut, string> = {
   A_FAIRE: 'À faire',
   EN_COURS: 'En cours',
   TERMINE: 'Terminé',
+};
+
+const LIBELLE_ORIGINE: Record<Origine, string> = {
+  REGLE: 'Règle',
+  IA: 'IA',
+  MANUEL: 'Manuel',
 };
 
 const LIBELLE_PRIORITE: Record<Priorite, string> = {
@@ -144,6 +150,10 @@ export default function Suivi() {
                 className={`shrink-0 rounded-full px-2 py-0.5 text-xs ${COULEUR_PRIORITE[action.priorite]}`}
               >
                 {LIBELLE_PRIORITE[action.priorite]}
+              </span>
+
+              <span className="shrink-0 rounded-full border border-bordure px-2 py-0.5 text-xs text-slate-500">
+                {LIBELLE_ORIGINE[action.origine]}
               </span>
 
               <div className="min-w-0 flex-1">

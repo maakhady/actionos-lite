@@ -8,7 +8,7 @@ import {
   IsUUID,
   MaxLength,
 } from 'class-validator';
-import { Priorite, Statut } from '../../extraction/domain/action-brouillon';
+import { Origine, Priorite, Statut } from '../../extraction/domain/action-brouillon';
 
 export class CreateActionDto {
   @IsOptional()
@@ -36,4 +36,8 @@ export class CreateActionDto {
   @IsOptional()
   @IsEnum(Statut)
   statut?: Statut;
+
+  @IsOptional()
+  @IsEnum(Origine)
+  origine?: Origine;
 }

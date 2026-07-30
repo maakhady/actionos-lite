@@ -1,4 +1,4 @@
-import { ActionBrouillon, Priorite } from './domain/action-brouillon';
+import { ActionBrouillon, Origine, Priorite } from './domain/action-brouillon';
 import { ActionExtractor } from './domain/extractor.port';
 
 const PUCE = /^\s*(?:[-*•–—]|\d+[.)])\s+/;
@@ -166,6 +166,7 @@ export class RulesExtractor implements ActionExtractor {
       responsable: this.extraireResponsable(contenu),
       echeance: this.extraireEcheance(contenu, dateReunion),
       priorite: this.extrairePriorite(contenu),
+      origine: Origine.REGLE,
     };
   }
 

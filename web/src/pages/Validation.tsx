@@ -1,13 +1,19 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { actions as apiActions, comptesRendus } from '../api';
-import type { ActionBrouillon, CompteRendu, Priorite } from '../types';
+import type { ActionBrouillon, CompteRendu, Origine, Priorite } from '../types';
 
 // Une fois enregistrées, les actions ont un id : on peut alors les corriger
 // une par une (PATCH) directement depuis cette page.
 type Brouillon = ActionBrouillon & { id?: string };
 
 const PRIORITES: Priorite[] = ['BASSE', 'MOYENNE', 'HAUTE'];
+
+const LIBELLE_ORIGINE: Record<Origine, string> = {
+  REGLE: 'Règle',
+  IA: 'IA',
+  MANUEL: 'Manuel',
+};
 
 const LIBELLE_PRIORITE: Record<Priorite, string> = {
   BASSE: 'Faible',
@@ -31,6 +37,7 @@ const ACTION_VIDE: ActionBrouillon = {
   responsable: null,
   echeance: null,
   priorite: 'BASSE',
+  origine: 'MANUEL',
 };
 
 export default function Validation() {
@@ -158,6 +165,9 @@ export default function Validation() {
                   placeholder="Description de l'action"
                   className="flex-1 rounded-md border border-bordure bg-white px-2 py-1 text-sm outline-none focus:border-or-500"
                 />
+                <span className="shrink-0 rounded-full border border-bordure px-2 py-0.5 text-xs text-slate-500">
+                  {LIBELLE_ORIGINE[action.origine]}
+                </span>
                 {incomplete && (
                   <span className="shrink-0 rounded-full bg-white px-2 py-0.5 text-xs text-or-600">
                     à confirmer
