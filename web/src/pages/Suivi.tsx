@@ -31,6 +31,8 @@ const COULEUR_PRIORITE: Record<Priorite, string> = {
   HAUTE: 'bg-marine-900 text-white',
 };
 
+const PAR_PAGE = 7;
+
 const estEnRetard = (action: Action) =>
   action.echeance !== null &&
   action.statut !== 'TERMINE' &&
@@ -43,6 +45,7 @@ export default function Suivi() {
   const [erreur, setErreur] = useState<string | null>(null);
   const [chargement, setChargement] = useState(true);
   const [selection, setSelection] = useState<Action | null>(null);
+  const [page, setPage] = useState(1);
 
   const charger = async (statut: Statut | null) => {
     setChargement(true);
@@ -56,6 +59,7 @@ export default function Suivi() {
   };
 
   useEffect(() => {
+    setPage(1);
     void charger(filtre);
   }, [filtre]);
 
@@ -79,6 +83,13 @@ export default function Suivi() {
 
   const retards = liste.filter(estEnRetard).length;
   const aConfirmer = liste.filter((a) => !a.responsable || !a.echeance).length;
+
+  const totalPages = Math.max(1, Math.ceil(liste.length / PAR_PAGE));
+  const pageActuelle = Math.min(page, totalPages);
+  const listePage = liste.slice(
+    (pageActuelle - 1) * PAR_PAGE,
+    pageActuelle * PAR_PAGE,
+  );
 
   return (
     <div>
@@ -139,7 +150,7 @@ export default function Suivi() {
           </p>
         )}
 
-        {liste.map((action) => {
+        {listePage.map((action) => {
           const retard = estEnRetard(action);
           const incomplete = !action.responsable || !action.echeance;
           return (
@@ -214,6 +225,28 @@ export default function Suivi() {
           );
         })}
       </div>
+
+      {totalPages > 1 && (
+        <div className="mt-4 flex items-center justify-center gap-4 text-sm">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={pageActuelle === 1}
+            className="rounded-md border border-bordure bg-white px-3 py-1.5 text-slate-600 hover:border-slate-400 disabled:opacity-40"
+          >
+            Précédent
+          </button>
+          <span className="text-slate-500">
+            Page {pageActuelle} sur {totalPages}
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={pageActuelle === totalPages}
+            className="rounded-md border border-bordure bg-white px-3 py-1.5 text-slate-600 hover:border-slate-400 disabled:opacity-40"
+          >
+            Suivant
+          </button>
+        </div>
+      )}
 
       {selection && (
         <div
